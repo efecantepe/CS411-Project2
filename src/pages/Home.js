@@ -13,7 +13,6 @@ import {
 	MenuList,
 	Popover,
 	TextField,
-	Typography,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
@@ -62,7 +61,7 @@ const Home = () => {
 	useEffect(() => {
 		const getBookmarks = async () => {
 			await axios
-				.get('/')
+				.get('/getBookmarks')
 				.then((res) => {
 					if (res && res.data) {
 						console.log(res.data);
@@ -139,7 +138,7 @@ const Home = () => {
 	const addBookmark = async () => {
 		const request = { url: url };
 		await axios
-			.post('/', request)
+			.post('/addBookmark', request)
 			.then((res) => {
 				if (res && res.data) {
 					console.log(res.data);
