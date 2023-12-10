@@ -155,7 +155,7 @@ const Home = () => {
 	const removeBookmark = async () => {
 		const request = { url: url };
 		await axios
-			.post('/', request)
+			.post('/deleteBookmark', request)
 			.then((res) => {
 				if (res && res.data) {
 					console.log(res.data);

@@ -31,17 +31,14 @@ app.post('/addBookmark', (req, res) => {
 app.post('/deleteBookmark', (req, res) => {
 	console.log(req.body);
 	let deleteBookmark = req.body.deletedBookmark;
-	let data = JSON.parse(fs.readFileSync('bookmark.json', 'utf8'));
+	let data = JSON.parse(fs.readFileSync('server/bookmark.json', 'utf8'));
 	if (typeof deleteBookmark === undefined || deleteBookmark.length === 0) {
 		data.bookmarks = [];
 	} else {
 		console.log('Else');
 		data.bookmarks = filterArrays(data.bookmarks, deleteBookmark);
 	}
-
-	//console.log(data.bookmarks)
-
-	fs.writeFileSync('bookmark.json', JSON.stringify(data), 'utf8');
+	fs.writeFileSync('server/bookmark.json', JSON.stringify(data), 'utf8');
 	res.send(200, data.bookmarks);
 });
 
