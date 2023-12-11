@@ -1,7 +1,1 @@
-{
-	"bookmarks": [
-		{ "name": "facebook", "url": "facebook.com" },
-		{ "name": "x", "url": "x.com" },
-		{ "url": "www.google.com" }
-	]
-}
+{"bookmarks":[{"name":"facebook","url":"https://facebook.com"},{"name":"google","url":"https://google.com"}]}

@@ -6,7 +6,7 @@ import BookmarksIcon from '@mui/icons-material/Bookmarks';
 import DoneIcon from '@mui/icons-material/Done';
 import {
 	Box,
-	Grid,
+	Divider,
 	IconButton,
 	InputAdornment,
 	MenuItem,
@@ -19,11 +19,10 @@ import { useEffect, useState } from 'react';
 import axios from '../axios_config';
 
 const PageLayoutRoot = styled('div')(({ theme }) => ({
-	maxWidth: false,
-	width: '100vm',
-	height: '100vh',
-	backgroundColor: theme.palette.background.default,
-	justifyContent: 'center',
+	display: 'flex',
+	flex: '1 1 auto',
+	maxWidth: '100%',
+	paddingTop: 10,
 }));
 
 const Home = () => {
@@ -32,11 +31,7 @@ const Home = () => {
 	const [url, setUrl] = useState('');
 	const [html, setHtml] = useState('');
 
-	const [bookmarks, setBookmarks] = useState([
-		{ name: 'Google', url: 'www.google.com' },
-		{ name: 'YouTube', url: 'www.youtube.com' },
-		{ name: 'Facebook', url: 'www.facebook.com' },
-	]);
+	const [bookmarks, setBookmarks] = useState([]);
 
 	const open = Boolean(anchorEl);
 	const id = open ? 'simple-popover' : undefined;
@@ -53,61 +48,49 @@ const Home = () => {
 		setUrl(e.target.value);
 	};
 
-	const onClickUrl = (e) => {
-		console.log(e.target.value);
-		//setUrl(e.target.value);
-	};
-
 	useEffect(() => {
-		const getBookmarks = async () => {
-			await axios
-				.get('/getBookmarks')
-				.then((res) => {
-					if (res && res.data) {
-						console.log(res.data);
-						let arr = [];
-						for (let i = 0; i < res.data.length; i++) {
-							arr.push(res.data[i]);
-						}
-						setBookmarks(arr);
-					}
-				})
-				.catch((err) => {
-					if (err && err.response) {
-						console.log('Error:', err.response.data);
-					} else {
-						alert('Connection error');
-					}
-				});
-		};
 		getBookmarks();
 	}, []);
 
 	const getPage = async () => {
 		const request = { url: url };
-		console.log(request);
 		await axios
-			.post('/', request)
+			.post('/getSite', request)
 			.then((res) => {
-				if (res && res.data) {
-					console.log(res.data);
+				if (res) {
+					console.log(res)
+					setUrl(res.data.url)
+					setHtml(res.data.html)
 				}
 			})
 			.catch((err) => {
-				if (err && err.response) {
-					console.log('Error:', err.response.data);
-				} else {
-					alert('Connection error');
+				console.log(err)
+			})
+	}
+
+	const getPageInstant = async (url_inst) => {
+		const request = { url: url_inst };
+		await axios
+			.post('/getSite', request)
+			.then((res) => {
+				if (res) {
+					console.log(res)
+					setUrl(res.data.url)
+					setHtml(res.data.html)
 				}
-			});
-	};
+			})
+			.catch((err) => {
+				console.log(err)
+			})
+	}
 
 	const getPrevPage = async () => {
 		await axios
-			.get('/')
+			.get('/getPrevious')
 			.then((res) => {
 				if (res && res.data) {
-					console.log(res.data);
+					setHtml(res.data.html)
+					setUrl(res.data.url)
 				}
 			})
 			.catch((err) => {
@@ -120,10 +103,33 @@ const Home = () => {
 	};
 	const getNextPage = async () => {
 		await axios
-			.get('/')
+			.get('/getNext')
+			.then((res) => {
+				if (res && res.data) {
+					setHtml(res.data.html)
+					setUrl(res.data.url)
+				}
+			})
+			.catch((err) => {
+				if (err && err.response) {
+					console.log('Error:', err.response.data);
+				} else {
+					alert('Connection error');
+				}
+			});
+	};
+	
+	const getBookmarks = async () => {
+		await axios
+			.get('/getBookmarks')
 			.then((res) => {
 				if (res && res.data) {
 					console.log(res.data);
+					let arr = [];
+					for (let i = 0; i < res.data.length; i++) {
+						arr.push(res.data[i]);
+					}
+					setBookmarks(arr);
 				}
 			})
 			.catch((err) => {
@@ -142,11 +148,13 @@ const Home = () => {
 			.then((res) => {
 				if (res && res.data) {
 					console.log(res.data);
+					getBookmarks()
 				}
 			})
 			.catch((err) => {
 				if (err && err.response) {
-					console.log('Error:', err.response.data);
+					console.log(err.response.data.msg)
+					alert('Error: '+ err.response.data.msg);
 				} else {
 					alert('Connection error');
 				}
@@ -159,11 +167,12 @@ const Home = () => {
 			.then((res) => {
 				if (res && res.data) {
 					console.log(res.data);
+					getBookmarks()
 				}
 			})
 			.catch((err) => {
 				if (err && err.response) {
-					console.log('Error:', err.response.data);
+					alert('Error: '+ err.response.data.msg);
 				} else {
 					alert('Connection error');
 				}
@@ -177,110 +186,95 @@ const Home = () => {
 					component="main"
 					sx={{
 						display: 'flex',
+						flex: '1 1 auto',
+						flexDirection: 'column',
 						width: '100%',
-						height: '100%',
+						flexGrow: 1,
 					}}
 				>
-					<Grid
-						container
-						direction="column"
-						alignItems="center"
-						justifyContent="center"
-						spacing={5}
+					<Box
+						sx={{
+							display: 'flex',
+							flexDirection: 'row',
+							justifyContent: 'space-between'
+						}}
 					>
-						<Grid
-							container
-							item
-							sx={{}}
-							direction="row"
-							alignItems="top"
-							justifyContent="center"
-							spacing={50}
-						>
-							<Grid item>
-								<IconButton onClick={getPrevPage}>
-									<ArrowBackIcon />
-								</IconButton>
-								<IconButton onClick={getNextPage}>
-									<ArrowForwardIcon />
-								</IconButton>
-							</Grid>
-							<Grid item>
-								<Box>
-									<TextField
-										onChange={onChangeUrl}
-										value={url}
-										InputProps={{
-											endAdornment: (
-												<InputAdornment position="end">
-													<IconButton onClick={getPage}>
-														<DoneIcon />
-													</IconButton>
-												</InputAdornment>
-											),
-										}}
-									>
-										{url}
-									</TextField>
-								</Box>
-							</Grid>
-							<Grid item>
-								<IconButton onClick={addBookmark}>
-									<BookmarkAddIcon />
-								</IconButton>
-								<IconButton onClick={removeBookmark}>
-									<BookmarkRemoveIcon />
-								</IconButton>
-								<IconButton
-									aria-describedby={id}
-									variant="contained"
-									onClick={handleClick}
-								>
-									<BookmarksIcon />
-								</IconButton>
-								<Popover
-									id={id}
-									open={open}
-									anchorEl={anchorEl}
-									onClose={handleClose}
-									anchorOrigin={{
-										vertical: 'bottom',
-										horizontal: 'left',
-									}}
-								>
-									<MenuList>
-										{bookmarks.map((bookmark, index) => (
-											<MenuItem
-												key={bookmark.name}
-												value={bookmark.url}
-												onClick={() => setUrl(bookmark.url)}
-											>
-												{bookmark.name + ' ' + bookmark.url}
-											</MenuItem>
-										))}
-									</MenuList>
-								</Popover>
-							</Grid>
-						</Grid>
-						<Grid
-							container
-							item
-							direction="row"
-							spacing={5}
-							justifyContent="center"
-						>
-							<Grid item>
-								<div
-									dangerouslySetInnerHTML={{ __html: html }}
-									style={{
-										minWidth: '1400px',
-										minHeight: '800px',
-										border: 'thin solid black',
-									}}
-								></div>
-							</Grid>
-						</Grid>
-					</Grid>
+						<Box>
+							<IconButton onClick={getPrevPage}>
+								<ArrowBackIcon />
+							</IconButton>
+							<IconButton onClick={getNextPage}>
+								<ArrowForwardIcon />
+							</IconButton>
+						</Box>
+						<Box>
+							<TextField
+								onChange={onChangeUrl}
+								value={url}
+								InputProps={{
+									endAdornment: (
+										<InputAdornment position="end">
+											<IconButton onClick={getPage}>
+												<DoneIcon />
+											</IconButton>
+										</InputAdornment>
+									),
+								}}
+							>
+								{url}
+							</TextField>
+						</Box>
+						<Box>
+							<IconButton onClick={addBookmark}>
+								<BookmarkAddIcon />
+							</IconButton>
+							<IconButton onClick={removeBookmark}>
+								<BookmarkRemoveIcon />
+							</IconButton>
+							<IconButton
+								aria-describedby={id}
+								variant="contained"
+								onClick={handleClick}
+							>
+								<BookmarksIcon />
+							</IconButton>
+							<Popover
+								id={id}
+								open={open}
+								anchorEl={anchorEl}
+								onClose={handleClose}
+								anchorOrigin={{
+									vertical: 'bottom',
+									horizontal: 'left',
+								}}
+							>
+								<MenuList>
+									{bookmarks.map((bookmark, index) => (
+										<MenuItem
+											key={index}
+											value={bookmark.url}
+											onClick={() => {
+												getPageInstant(bookmark.url)
+												handleClose()
+											}}
+										>
+											{bookmark.name + ' | ' + bookmark.url}
+										</MenuItem>
+									))}
+								</MenuList>
+							</Popover>
+						</Box>
+					</Box>
+					<Divider sx={{mt:3}}/>
+					<Box>
+						<div
+							dangerouslySetInnerHTML={{ __html: html }}
+							style={{
+								minWidth: '1400px',
+								minHeight: '800px',
+							}}
+						></div>
+					</Box>
 				</Box>
 			</PageLayoutRoot>
 		</>
